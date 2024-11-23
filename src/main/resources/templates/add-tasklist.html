@@ -1,0 +1,19 @@
+<!-- new, check -->
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Add Task List</title>
+</head>
+<body>
+
+<h1>Add New Task List</h1>
+
+<form th:action="@{/tasklists}" th:object="${taskList}" method="post">
+    <label for="name">Task List Name:</label>
+    <input type="text" id="name" th:field="*{title}" required />
+    <button type="submit">Add Task List</button>
+</form>
+
+</body>
+</html>

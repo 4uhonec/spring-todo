@@ -1,0 +1,153 @@
+<!--<p>
+    <a th:href="@{/create_new_list}">create new list ..<img th:src="@{/images/plus.svg}" width="10" height="auto" alt="plus"></a>
+</p>--><!--
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Active lists</title>
+    </head>
+    <body>
+
+
+        <h2>todo lists:</h2>
+        <div th:each="taskList : ${taskLists}" class="card mb-3">
+            <div class="card-header">
+                <h3 th:text="${taskList.title}">Task List Name <a th:href="@{/add_task}">+</a></h3>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+
+                    <li th:each="task : ${taskList.tasks}" class="list-group-item">
+                        <span th:text="${task.description}">Task Description</span>
+
+                        <span th:text="${task.completed} ? 'Completed' : 'Not Completed'" class="badge badge-success"></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+    </body>
+</html>-->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Task Lists</title>
+    <style>
+
+        .tasklist-header, .task-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .tasklist-header .buttons, .task-item .buttons {
+            margin-left: auto;
+        }
+
+        .tasklist-header button, .task-item button {
+            margin-left: 10px;
+        }
+
+        .tasklist-name {
+            cursor: pointer;
+        }
+
+        .add-tasklist-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+
+        .tasks {
+            margin-left: 20px;
+        }
+
+        /* Hide the add task form by default */
+        .add-task-form {
+            display: none;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Task Lists</h1>
+
+<div th:each="taskList : ${taskLists}">
+    <div class="tasklist-header">
+        <h2 class="tasklist-name" th:text="${taskList.title}"
+            th:onclick="'toggleTasks(' + '\'' + ${taskList.id} + '\'' + ')'">
+        </h2>
+
+        <div class="buttons">
+
+            <button type="button" th:onclick="|showAddTaskForm('${taskList.id}')|">Add Task</button>
+
+            <form th:action="@{/tasklists/{id}/delete(id=${taskList.id})}" method="post" style="display:inline;">
+                <button type="submit">Delete List</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tasks within the TaskList -->
+    <div class="tasks" th:id="'tasks-' + ${taskList.id}">
+        <ul>
+            <!-- Iterate over the tasks in the taskList -->
+            <li th:each="task : ${taskList.tasks}">
+                <div class="task-item">
+                    <!-- Task Description -->
+                    <span th:text="${task.description}"></span>
+
+                    <!-- Buttons for Task -->
+                    <div class="buttons">
+                        <!-- Update Task Button -->
+                        <form th:action="@{/tasks/{id}/edit(id=${task.id})}" method="get" style="display:inline;">
+                            <button type="submit">Edit</button>
+                        </form>
+
+                        <!-- Delete Task Button -->
+                        <form th:action="@{/tasks/{id}/delete(id=${task.id})}" method="post" style="display:inline;">
+                            <button type="submit">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </li>
+        </ul>
+
+        <div class="add-task-form" th:id="'add-task-form-' + ${taskList.id}">
+            <form th:action="@{/tasklists/{taskListId}/tasks(taskListId=${taskList.id})}" method="post">
+
+                <input type="text" name="description" placeholder="Task Description" required />
+                <button type="submit">Add Task</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<form th:action="@{/tasklists/add}" method="get">
+    <button type="submit" class="add-tasklist-button">Add New Task List</button>
+</form>
+
+<!-- JavaScript for collapsing/expanding task lists and showing add task forms -->
+<script>
+    function toggleTasks(taskListId) {
+        var tasksDiv = document.getElementById('tasks-' + taskListId);
+        if (tasksDiv.style.display === 'none') {
+            tasksDiv.style.display = 'block';
+        } else {
+            tasksDiv.style.display = 'none';
+        }
+    }
+
+    function showAddTaskForm(taskListId) {
+        var addTaskForm = document.getElementById('add-task-form-' + taskListId);
+        if (addTaskForm.style.display === 'none' || addTaskForm.style.display === '') {
+            addTaskForm.style.display = 'block';
+        } else {
+            addTaskForm.style.display = 'none';
+        }
+    }
+</script>
+
+</body>
+</html>

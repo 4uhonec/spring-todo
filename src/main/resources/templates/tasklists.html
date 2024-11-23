@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Task Lists</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: monospace;
+        }
+
+        .tasklist-container {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 15px;
+            background-color: #f9f9f9;
+        }
+
+        .tasklist-header, .task-item {
+            display: flex;
+            align-items: center;
+            padding: 5px;
+        }
+
+        .tasklist-header {
+            background-color: #e6e6e6;
+            cursor: pointer;
+        }
+
+        .tasklist-header:hover {
+            background-color: #d9d9d9;
+        }
+
+        .tasklist-header .buttons, .task-item .buttons {
+            margin-left: auto;
+        }
+
+        .tasklist-header button, .task-item button {
+            margin-left: 10px;
+        }
+
+        .tasklist-name {
+            margin: 0;
+        }
+
+        .tasks {
+            margin-left: 20px;
+            padding-left: 0;
+        }
+
+        .tasks ul {
+            list-style-type: none;
+            padding-left: 0;
+            margin: 0;
+        }
+
+        .task-item {
+            border-bottom: 1px solid #ddd;
+            padding: 5px;
+            cursor: pointer;
+        }
+
+        .task-item:hover {
+            background-color: #f2f2f2;
+        }
+
+        .task-item:last-child {
+            border-bottom: none;
+        }
+
+        .task-item .buttons {
+            display: none;
+        }
+
+        .add-tasklist-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .add-tasklist-button:hover {
+            background-color: #45a049;
+        }
+
+        .add-task-form {
+            display: none;
+            margin-top: 10px;
+        }
+
+        .add-task-form input[type="text"] {
+            padding: 5px;
+            width: 70%;
+            margin-right: 10px;
+        }
+
+        .add-task-form button {
+            padding: 5px 10px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Task Lists</h1>
+
+<div th:each="taskList : ${taskLists}" class="tasklist-container">
+    <div class="tasklist-header" th:attr="data-tasklist-id=${taskList.id}">
+        <h2 class="tasklist-name" th:text="${taskList.title}"></h2>
+
+        <div class="buttons">
+            <button type="button" class="add-task-button" th:attr="data-tasklist-id=${taskList.id}">Add Task</button>
+
+            <form th:action="@{/tasklists/{id}/delete(id=${taskList.id})}" method="post" style="display:inline;">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <button type="submit">Delete List</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="tasks" th:id="'tasks-' + ${taskList.id}">
+        <ul>
+            <li th:each="task : ${taskList.tasks}">
+                <div class="task-item" th:attr="data-task-id=${task.id}">
+                    <span class="task-desc" th:text="${task.description}"></span>
+
+                    <div class="buttons">
+                        <form th:action="@{/tasks/{id}/edit(id=${task.id})}" method="get" style="display:inline;">
+                            <button type="submit">Edit</button>
+                        </form>
+
+                        <form th:action="@{/tasks/{id}/delete(id=${task.id})}" method="post" style="display:inline;">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                            <button type="submit">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </li>
+        </ul>
+
+        <div class="add-task-form" th:id="'add-task-form-' + ${taskList.id}">
+            <form th:action="@{/tasklists/{taskListId}/tasks(taskListId=${taskList.id})}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                <input type="text" name="description" placeholder="Task Description" required />
+                <button type="submit">Add Task</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<form th:action="@{/tasklists/add}" method="get">
+    <button type="submit" class="add-tasklist-button">Add New List</button>
+</form>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var taskListHeaders = document.querySelectorAll('.tasklist-header');
+        taskListHeaders.forEach(function(header) {
+            header.addEventListener('click', function(event) {
+                if (event.target.tagName.toLowerCase() === 'button' || event.target.tagName.toLowerCase() === 'form') {
+                    return;
+                }
+                var taskListId = this.getAttribute('data-tasklist-id');
+                toggleTasks(taskListId);
+            });
+        });
+
+        var addTaskButtons = document.querySelectorAll('.add-task-button');
+        addTaskButtons.forEach(function(button) {
+            button.addEventListener('click', function(event) {
+                event.stopPropagation();
+                var taskListId = this.getAttribute('data-tasklist-id');
+                showAddTaskForm(taskListId);
+            });
+        });
+
+        var taskItems = document.querySelectorAll('.task-item');
+        taskItems.forEach(function(taskItem) {
+            taskItem.addEventListener('click', function(event) {
+                if (event.target.tagName.toLowerCase() === 'button' || event.target.tagName.toLowerCase() === 'form') {
+                    return;
+                }
+                var buttonsDiv = this.querySelector('.buttons');
+                toggleTaskButtons(buttonsDiv);
+            });
+        });
+    });
+
+    function toggleTasks(taskListId) {
+        var tasksDiv = document.getElementById('tasks-' + taskListId);
+        if (tasksDiv.style.display === 'none' || tasksDiv.style.display === '') {
+            tasksDiv.style.display = 'block';
+        } else {
+            tasksDiv.style.display = 'none';
+        }
+    }
+
+    function showAddTaskForm(taskListId) {
+        var addTaskForm = document.getElementById('add-task-form-' + taskListId);
+        if (addTaskForm.style.display === 'none' || addTaskForm.style.display === '') {
+            addTaskForm.style.display = 'block';
+        } else {
+            addTaskForm.style.display = 'none';
+        }
+    }
+
+    function toggleTaskButtons(buttonsDiv) {
+        if (buttonsDiv.style.display === 'none' || buttonsDiv.style.display === '') {
+            buttonsDiv.style.display = 'flex';
+        } else {
+            buttonsDiv.style.display = 'none';
+        }
+    }
+</script>
+
+</body>
+</html>
