@@ -6,8 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-
 import java.util.List;
 
 @Controller
@@ -23,16 +21,6 @@ public class IndexController {
 
         return "tasklists";
     }
-
-    /*@GetMapping("/")
-    public String root() {
-        return "index";
-    }*/
-
-    /*@PostMapping("/index")
-    public String updateList(Model model) {//update tasks that have been completed based on checked boxes
-        return "index";
-    }*/
 
 }
 

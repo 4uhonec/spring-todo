@@ -1,11 +1,10 @@
 package com.vilenski.todo.service;
 
 import com.vilenski.todo.entity.Task;
-import com.vilenski.todo.entity.TaskList;
-import com.vilenski.todo.repository.TaskListRepository;
 import com.vilenski.todo.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +32,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    @Transactional
     public Boolean deleteTaskById(UUID id) {
         if(taskRepository.existsById(id)){
             Optional<Task> optionalTask = taskRepository.findTaskById(id);
@@ -47,11 +47,13 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    @Transactional
     public Task addTask(Task task, UUID taskListId) {
         return taskRepository.save(task);
     }
 
     @Override//todo: update, create, delete -> T, findBy.. -> Optional<T>
+    @Transactional
     public Task updateTask(UUID id, Task task) {
         Optional<Task> optionalTask = taskRepository.findTaskById(id);
         if(optionalTask.isEmpty()){
@@ -64,6 +66,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    @Transactional
     public Task setCompletedTask(UUID id) {
         Optional<Task> optionalTask = taskRepository.findTaskById(id);
         if(optionalTask.isEmpty()){

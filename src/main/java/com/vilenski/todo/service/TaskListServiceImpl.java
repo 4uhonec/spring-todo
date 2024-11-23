@@ -4,6 +4,7 @@ import com.vilenski.todo.entity.TaskList;
 import com.vilenski.todo.repository.TaskListRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,11 +34,13 @@ public class TaskListServiceImpl implements TaskListService {
     }
 
     @Override
+    @Transactional
     public TaskList saveTaskList(TaskList taskList) {
         return taskListRepository.save(taskList);
     }
 
     @Override
+    @Transactional
     public Boolean deleteTaskListById(UUID listId) {
         if (taskListRepository.existsById(listId)) {
             taskListRepository.delete(taskListRepository.findTaskListById(listId).get());
@@ -45,15 +48,5 @@ public class TaskListServiceImpl implements TaskListService {
         }else
             return false;
     }
-}//todo: this is persistance, check
-/*    public void addTaskToTaskList(UUID taskListId, String description) {
-        TaskList taskList = taskListRepository.findById(taskListId)
-                .orElseThrow(() -> new RuntimeException("TaskList not found"));
-
-        Task task = new Task();
-        task.setDescription(description);
-        task.setTaskList(taskList);
-
-        taskRepository.save(task);
-    }*/
+}
 
